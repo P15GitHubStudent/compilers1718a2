@@ -15,13 +15,12 @@ def boolean_value(str1, str2, option):
         else:
             return "True"
     elif option == "or":
-        if str1 == "False" or str2 == "False":
+        if str1 == "False" and str2 == "False":
             return "False"
         else:
             return "True"
     else:
         return "WRONG-INPUT"
-
 
 def revbool_value(str1, rev):
     if rev:
@@ -110,18 +109,21 @@ class MyParser():
             if tt is None:
                 return t
             if tt[0] == "or":
-                return self.or_operation(t, tt[1])
+                return boolean_value(t, tt[1], 'or')
         else:
             raise ParseError("Expected: '(' or identifier or not or boolean value")
 
     def term_tail(self):
         if self.la == "or":
+            print("term-tail", self.la)
             op = self.orop()
             t = self.term()
             tt = self.term_tail()
             if tt is None:
+                print("tt is none term found is", t)
                 return op, t
             if tt[0] == "or":
+                print("boolean_value of t and tt[1] is",t, tt[1], boolean_value(t, tt[1],'or'))
                 return op, boolean_value(t, tt[1], "or")
         elif self.la == "IDENTIFIER" or self.la == "print" or self.la == ")" or self.la is None: 
             return
@@ -130,7 +132,8 @@ class MyParser():
 
     def term(self):
         if self.la == "(" or self.la == "not" or self.la == "IDENTIFIER" or self.la == "True" or self.la == "False": 
-            f = self.factor()
+            #f = self.factor()
+            f = self.negative_factor()
             ft = self.factor_tail()
             if ft is None:
                 return f
@@ -142,7 +145,8 @@ class MyParser():
     def factor_tail(self):
         if self.la == "and":
             op = self.andop()
-            f = self.factor()
+            #f = self.factor()
+            f = self.negative_factor()
             ft = self.factor_tail()
             if ft is None:
                 return op, f
@@ -153,26 +157,30 @@ class MyParser():
         else:
             raise ParseError("Expected: 'and'")
 
-    def factor(self):
-        n = False
+    def negative_factor(self):
+        negative = False
         if self.la == 'not':
-            self.match("not") 
-            n = True   
+            print("ITS A negative")
+            negative = True
+            self.match("not")
+        return revbool_value(self.factor(), negative)
+
+    def factor(self):
         if self.la == '(':
             self.match('(')
             e = self.expr()
             self.match(')')
-            return revbool_value(e, n)
+            return e
         elif self.la == "IDENTIFIER":
             varname = self.val
             self.match(self.la)
             if varname in self.st:
-                return revbool_value(self.st[varname], n)
+                return self.st[varname]
             raise RunError("Unitialized variable: ", varname)
-        elif self.la in ["True", "False"]:
+        elif self.la == "True" or self.la == "False":
             token = self.la
             self.match(token)
-            return revbool_value(token, n )
+            return token
         else:
             raise ParseError("Expected: notop id,  notop(expr), notop values, (expr), id, notop boolean")
 
