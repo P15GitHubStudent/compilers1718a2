@@ -115,15 +115,15 @@ class MyParser():
 
     def term_tail(self):
         if self.la == "or":
-            print("term-tail", self.la)
+            #print("term-tail", self.la)
             op = self.orop()
             t = self.term()
             tt = self.term_tail()
             if tt is None:
-                print("tt is none term found is", t)
+                #print("tt is none term found is", t)
                 return op, t
             if tt[0] == "or":
-                print("boolean_value of t and tt[1] is",t, tt[1], boolean_value(t, tt[1],'or'))
+               # print("boolean_value of t and tt[1] is",t, tt[1], boolean_value(t, tt[1],'or'))
                 return op, boolean_value(t, tt[1], "or")
         elif self.la == "IDENTIFIER" or self.la == "print" or self.la == ")" or self.la is None: 
             return
@@ -160,7 +160,7 @@ class MyParser():
     def negative_factor(self):
         negative = False
         if self.la == 'not':
-            print("ITS A negative")
+            #print("ITS A negative")
             negative = True
             self.match("not")
         return revbool_value(self.factor(), negative)
@@ -204,5 +204,5 @@ fp = open("data.txt", "r")
 try:
     p.parse(fp)
 except ParseError as perr:
-    print("perr" + perr)
+    print("perr" + str(perr))
 fp.close()
