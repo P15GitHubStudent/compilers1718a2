@@ -157,5 +157,5 @@ fp = open("data.txt", "r")
 try:
     p.parse(fp)
 except ParseError as perr:
-    print("perr",  perr)
+    print("perr" + str(perr))
 fp.close()
