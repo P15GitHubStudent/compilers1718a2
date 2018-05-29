@@ -1,27 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf_8 -*-
-
-"""
-
-Session  -> Facts Question | ( Session ) Session
-Facts    -> Fact Facts | ε
-Fact     -> ! string
-Question -> ? string
-
-FIRST sets
-----------
-Session:  ( ? !
-Facts:    ε !
-Fact:     !
-Question: ?
-
-FOLLOW sets
------------
-Session:  # )
-Facts:    ?
-Fact:     ! ?
-Question: # )  
-"""
 import plex
 
 class ParseError(Exception):
@@ -30,8 +8,8 @@ class ParseError(Exception):
 class RunError(Exception):
 	pass
 
-def join_list(lst, blackmail_lst = []):
-	return ' '.join(str(e) for e in lst if str(e) not in blackmail_lst )
+def join_list(lst):
+	return ' '.join(str(e) for e in lst)
 
 
 class MyParser:
@@ -152,7 +130,7 @@ class MyParser:
 		tt_lst = ['or',')', 'ID', 'PRINT', None]
 
 		if self.la == 'or':
-			self.match('or')
+			self.or_op()
 			self.term()
 			self.term_tail()
 		elif self.la in tt_lst[1:]:
@@ -177,12 +155,12 @@ class MyParser:
 		#print('factor_tail - ', self.la)
 		ft_lst = ['and', 'or', ')', 'PRINT', 'ID', None]
 		if self.la == 'and':
-			op = self.match('and')
+			self.and_op()
 			f = self.negative_factor()
 			ft = self.factor_tail()
 
 			if ft is None:
-				return op, f
+				return 'and', f
 			if ft[0] == 'and':
 				return op, f and ft[1]
 
@@ -214,6 +192,18 @@ class MyParser:
 			self.debug_message('factor')
 			expected_str = join_list(nf_lst[2:])
 			raise ParseError('Expected : {}'.format(expected_str))
+
+	def and_op(self):
+		if self.la == 'and':
+			self.match('and')
+		else:
+			raise ParseError('Expected and !')
+
+	def or_op(self):
+		if self.la == 'or':
+			self.match('or')
+		else:
+			raise ParseError('Expected or !')
 
 # create the parser object
 parser = MyParser(debug = False)

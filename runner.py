@@ -186,10 +186,10 @@ class MyParser:
 		tt_lst = ['or',')', 'ID', 'PRINT', None]
 
 		if self.la == 'or':
-			self.match('or')
+			self.or_op()
 			t = self.term()
 			tt = self.term_tail()
-			return 'or',self.boolean_ops(t, tt)
+			return 'or', self.boolean_ops(t, tt)
 		elif self.la in tt_lst[1:]:
 			return
 		else:
@@ -217,11 +217,10 @@ class MyParser:
 		ft_lst = ['and', 'or', ')', 'PRINT', 'ID', None]
 		#print(" begin factor_tail - ", self.la )
 		if self.la == 'and':
-			self.match('and')
-			op = 'and'
+			self.and_op()
 			f = self.negative_factor()
 			ft = self.factor_tail()
-			return  op, self.boolean_ops(f, ft)
+			return  'and', self.boolean_ops(f, ft)
 		elif self.la in ft_lst[1:]:
 			return
 		else:
